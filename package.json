@@ -1,0 +1,28 @@
+{
+  "name": "videochat",
+  "version": "1.0.0",
+  "description": "화상회의 및 채팅 구현해보기! 뚜🤛따🤜",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kimmingki/videoChat.git"
+  },
+  "scripts": {
+    "dev:server": "nodemon"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kimmingki/videoChat/issues"
+  },
+  "homepage": "https://github.com/Kimmingki/videoChat#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.5",
+    "@babel/node": "^7.18.5",
+    "@babel/preset-env": "^7.18.2",
+    "nodemon": "^2.0.16"
+  },
+  "dependencies": {
+    "express": "^4.18.1",
+    "pug": "^3.0.2"
+  }
+}
