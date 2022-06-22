@@ -1,4 +1,6 @@
 import express from "express";
+import http from "http";
+import WebSocket from "ws";
 
 // -------- variable --------
 
@@ -20,10 +22,14 @@ app.use("/public", express.static(__dirname + "/public"));
 // ------------- routing -----------------
 
 app.get("/", (req, res) => res.render("home"));
+app.get("/*", (req, res) => res.redirect("home"));
 
 // ------------- routing -----------------
 
-// 서버 가동
-app.listen(PORT, () => {
-  console.log(`✅ Listening on http://localhost:4000`);
-});
+const handleListen = () => console.log(`✅ Listening on http://localhost:4000`);
+
+// http, ws 함께 돌리기
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+server.listen(PORT, handleListen);
