@@ -32,10 +32,13 @@ const handleListen = () => console.log(`✅ Listening on http://localhost:4000`)
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+const sockets = [];
+
 wss.on("connection", (socket) => {
+  sockets.push(socket);
   console.log("Connected to Browser ✅");
   socket.on("message", (message) => {
-    socket.send(message);
+    sockets.forEach((aSocket) => aSocket.send(message));
   });
 });
 
