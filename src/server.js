@@ -1,6 +1,6 @@
 import express from "express";
 import http from "http";
-import WebSocket from "ws";
+import SocketIO from "socket.io";
 
 // -------- variable --------
 
@@ -28,26 +28,16 @@ app.get("/*", (req, res) => res.redirect("home"));
 
 const handleListen = () => console.log(`✅ Listening on http://localhost:4000`);
 
-// http, ws 함께 돌리기
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const io = SocketIO(server);
 
+// 유저 정보
 const sockets = [];
 
-wss.on("connection", (socket) => {
-  sockets.push(socket);
-  socket["nickname"] = "Anon";
-  console.log("Connected to Browser ✅");
-  socket.on("message", (message) => {
-    const msg = JSON.parse(message);
-    switch (msg.type) {
-      case "message":
-        sockets.forEach((aSocket) =>
-          aSocket.send(`${socket.nickname}: ${msg.payload}`)
-        );
-      case "nickname":
-        socket["nickname"] = msg.payload;
-    }
+// socketIO 연결
+io.on("connection", (socket) => {
+  socket.on("enter_room", (message) => {
+    console.log(message);
   });
 });
 
