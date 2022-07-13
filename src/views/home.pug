@@ -10,9 +10,16 @@ html(lang="en")
         header
             h1 Video Chat
         main
-            div#welcome
+            #welcome
                 form
                     input(placeholder="room name", type="text", required)
                     button Enter Room
+            #room
+                h3
+                ul 
+                form
+                    input(placeholder="message", required, type="text")
+                    button Send
+
         script(src="/socket.io/socket.io.js") 
         script(src="../public/js/app.js") 

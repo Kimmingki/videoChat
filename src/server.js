@@ -36,8 +36,9 @@ const sockets = [];
 
 // socketIO 연결
 io.on("connection", (socket) => {
-  socket.on("enter_room", (message) => {
-    console.log(message);
+  socket.on("enter_room", (room, done) => {
+    socket.join(room);
+    done();
   });
 });
 
