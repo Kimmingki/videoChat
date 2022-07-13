@@ -25,19 +25,28 @@ const sockets = [];
 
 // socketIO 연결
 io.on("connection", (socket) => {
+  // init
+  socket["nickname"] = "Anon";
   // 채팅방 접속
   socket.on("enter_room", (room, done) => {
     socket.join(room);
     done();
-    socket.to(room).emit("welcome");
+    socket.to(room).emit("welcome", socket.nickname);
   });
   // 채팅방 퇴장
   socket.on("disconnecting", () => {
-    socket.rooms.forEach((room) => socket.to(room).emit("bye"));
+    socket.rooms.forEach((room) =>
+      socket.to(room).emit("bye", socket.nickname)
+    );
   });
   // 채팅
   socket.on("message", (msg, room, done) => {
-    socket.to(room).emit("message", msg);
+    socket.to(room).emit("message", `${socket.nickname}: ${msg}`);
+    done();
+  });
+  // 닉네임
+  socket.on("nickname", (nickname, done) => {
+    socket["nickname"] = nickname;
     done();
   });
 });
