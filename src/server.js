@@ -36,6 +36,11 @@ const publicRooms = () => {
   return publicRooms;
 };
 
+// 채팅방 유저 수
+const countUser = (room) => {
+  return io.sockets.adapter.rooms.get(room)?.size;
+};
+
 // 유저 정보
 const sockets = [];
 
@@ -46,14 +51,14 @@ io.on("connection", (socket) => {
   // 채팅방 접속
   socket.on("enter_room", (room, done) => {
     socket.join(room);
-    done();
-    socket.to(room).emit("welcome", socket.nickname);
+    done(room, countUser(room));
+    socket.to(room).emit("welcome", socket.nickname, countUser(room));
     io.sockets.emit("rooms", publicRooms()); // 방 정보
   });
   // 채팅방 퇴장
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) =>
-      socket.to(room).emit("bye", socket.nickname)
+      socket.to(room).emit("bye", socket.nickname, countUser(room) - 1)
     );
   });
   socket.on("disconnect", () => {

@@ -13,6 +13,11 @@ welcome.hidden = true;
 room.hidden = true;
 
 // ---------------- Start function part ------------------
+const roomTitle = (roomName, userCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (참여: ${userCount})`;
+};
+
 const addMessage = (message) => {
   const ul = room.querySelector("ul");
   const li = document.createElement("li");
@@ -30,12 +35,11 @@ const handleMessageSubmit = (event) => {
   input.value = "";
 };
 
-const showChat = () => {
-  const h3 = room.querySelector("h3");
+const showChat = (roomName, userCount) => {
+  roomTitle(roomName, userCount);
   const form = room.querySelector("form");
   welcome.hidden = true;
   room.hidden = false;
-  h3.innerText = `Room ${roomName}`;
   form.addEventListener("submit", handleMessageSubmit);
 };
 
@@ -65,8 +69,14 @@ const handleNickSubmit = (event) => {
 form.addEventListener("submit", handleNickSubmit);
 
 // socket event
-socket.on("welcome", (nickname) => addMessage(`${nickname} Joined😍`));
-socket.on("bye", (nickname) => addMessage(`${nickname} left😭`));
+socket.on("welcome", (nickname, countUser) => {
+  roomTitle(roomName, countUser);
+  addMessage(`${nickname} Joined😍`);
+});
+socket.on("bye", (nickname, countUser) => {
+  roomTitle(roomName, countUser);
+  addMessage(`${nickname} left😭`);
+});
 socket.on("message", addMessage);
 socket.on("rooms", (rooms) => {
   const roomList = welcome.querySelector("ul");
