@@ -68,3 +68,15 @@ form.addEventListener("submit", handleNickSubmit);
 socket.on("welcome", (nickname) => addMessage(`${nickname} Joined😍`));
 socket.on("bye", (nickname) => addMessage(`${nickname} left😭`));
 socket.on("message", addMessage);
+socket.on("rooms", (rooms) => {
+  const roomList = welcome.querySelector("ul");
+  roomList.innerHTML = "";
+  if (rooms.length === 0) {
+    return;
+  }
+  rooms.forEach((room) => {
+    const li = document.createElement("li");
+    li.innerText = room;
+    roomList.append(li);
+  });
+});

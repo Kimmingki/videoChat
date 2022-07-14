@@ -20,6 +20,22 @@ app.get("/*", (req, res) => res.redirect("home"));
 const server = http.createServer(app);
 const io = SocketIO(server);
 
+// adapter
+const publicRooms = () => {
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = io;
+  const publicRooms = [];
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key);
+    }
+  });
+  return publicRooms;
+};
+
 // 유저 정보
 const sockets = [];
 
@@ -32,12 +48,16 @@ io.on("connection", (socket) => {
     socket.join(room);
     done();
     socket.to(room).emit("welcome", socket.nickname);
+    io.sockets.emit("rooms", publicRooms()); // 방 정보
   });
   // 채팅방 퇴장
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) =>
       socket.to(room).emit("bye", socket.nickname)
     );
+  });
+  socket.on("disconnect", () => {
+    io.sockets.emit("rooms", publicRooms()); // 방 정보
   });
   // 채팅
   socket.on("message", (msg, room, done) => {
