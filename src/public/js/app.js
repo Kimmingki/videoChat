@@ -1,18 +1,31 @@
 // frontend socket 연결
 const socket = io();
 
-// document
+// chat document
 const nickname = document.getElementById("nickname");
 const form = nickname.querySelector("form");
 const welcome = document.getElementById("welcome");
 const room = document.getElementById("room");
+const hidden = document.getElementById("hidden");
 
-// init
+// video document
+const myFace = document.getElementById("myFace");
+const muteBtn = document.getElementById("mute");
+const cameraBtn = document.getElementById("camera");
+const cameraSelect = document.getElementById("cameras");
+
+// chat init
 let roomName = "";
 welcome.hidden = true;
 room.hidden = true;
+hidden.hidden = true;
 
-// ---------------- Start function part ------------------
+// video init
+let myStream;
+let muted = false;
+let cameraOff = false;
+
+// ---------------- Start chat function part ------------------
 const roomTitle = (roomName, userCount) => {
   const h3 = room.querySelector("h3");
   h3.innerText = `Room ${roomName} (참여: ${userCount})`;
@@ -63,10 +76,70 @@ const handleNickSubmit = (event) => {
   const input = nickname.querySelector("input");
   socket.emit("nickname", input.value, showRoom);
 };
-// ---------------- End function part ------------------
+// ---------------- End chat function part ------------------
+
+// ---------------- Start video function part ------------------
+const getCameras = async () => {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter((device) => device.kind === "videoinput");
+    cameras.forEach((camera) => {
+      const option = document.createElement("option");
+      option.value = camera.deviceId;
+      option.innerText = camera.label;
+      cameraSelect.appendChild(option);
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+const getMidea = async () => {
+  try {
+    myStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    myFace.srcObject = myStream;
+    await getCameras();
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const handleMuteClick = () => {
+  myStream
+    .getAudioTracks()
+    .forEach((track) => (track.enabled = !track.enabled));
+  if (!muted) {
+    muteBtn.innerText = "Unmute";
+    muted = true;
+  } else {
+    muteBtn.innerText = "Mute";
+    muted = false;
+  }
+};
+
+const handleCameraClick = () => {
+  myStream
+    .getVideoTracks()
+    .forEach((track) => (track.enabled = !track.enabled));
+  if (cameraOff) {
+    cameraBtn.innerText = "Camera Off";
+    cameraOff = false;
+  } else {
+    cameraBtn.innerText = "Camera On";
+    cameraOff = true;
+  }
+};
+// ---------------- End video function part ------------------
+
+// media
+getMidea();
 
 // event listen
 form.addEventListener("submit", handleNickSubmit);
+muteBtn.addEventListener("click", handleMuteClick);
+cameraBtn.addEventListener("click", handleCameraClick);
 
 // socket event
 socket.on("welcome", (nickname, countUser) => {
