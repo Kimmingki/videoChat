@@ -6,9 +6,9 @@ const nickname = document.getElementById("nickname");
 const form = nickname.querySelector("form");
 const welcome = document.getElementById("welcome");
 const room = document.getElementById("room");
-const hidden = document.getElementById("hidden");
 
 // video document
+const call = document.getElementById("call");
 const myFace = document.getElementById("myFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
@@ -18,65 +18,13 @@ const cameraSelect = document.getElementById("cameras");
 let roomName = "";
 welcome.hidden = true;
 room.hidden = true;
-hidden.hidden = true;
 
 // video init
 let myStream;
+let myPeerConnection;
 let muted = false;
 let cameraOff = false;
-
-// ---------------- Start chat function part ------------------
-const roomTitle = (roomName, userCount) => {
-  const h3 = room.querySelector("h3");
-  h3.innerText = `Room ${roomName} (참여: ${userCount})`;
-};
-
-const addMessage = (message) => {
-  const ul = room.querySelector("ul");
-  const li = document.createElement("li");
-  li.innerText = message;
-  ul.append(li);
-};
-
-const handleMessageSubmit = (event) => {
-  event.preventDefault();
-  const input = room.querySelector("input");
-  const value = input.value;
-  socket.emit("message", input.value, roomName, () =>
-    addMessage(`You: ${value}`)
-  );
-  input.value = "";
-};
-
-const showChat = (roomName, userCount) => {
-  roomTitle(roomName, userCount);
-  const form = room.querySelector("form");
-  welcome.hidden = true;
-  room.hidden = false;
-  form.addEventListener("submit", handleMessageSubmit);
-};
-
-const handleRoomSubmit = (event) => {
-  event.preventDefault();
-  const input = welcome.querySelector("input");
-  socket.emit("enter_room", input.value, showChat);
-  roomName = input.value;
-  input.value = "";
-};
-
-const showRoom = () => {
-  const form = welcome.querySelector("form");
-  nickname.hidden = true;
-  welcome.hidden = false;
-  form.addEventListener("submit", handleRoomSubmit);
-};
-
-const handleNickSubmit = (event) => {
-  event.preventDefault();
-  const input = nickname.querySelector("input");
-  socket.emit("nickname", input.value, showRoom);
-};
-// ---------------- End chat function part ------------------
+call.hidden = true;
 
 // ---------------- Start video function part ------------------
 const getCameras = async () => {
@@ -148,10 +96,67 @@ const handleCameraClick = () => {
 const handleCameraChange = async () => {
   await getMidea(cameraSelect.value);
 };
+
+const initCall = async () => {
+  welcome.hidden = true;
+  call.hidden = false;
+  await getMidea();
+  makeConnection();
+};
 // ---------------- End video function part ------------------
 
-// media
-getMidea();
+// ---------------- Start chat function part ------------------
+const roomTitle = (roomName, userCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (참여: ${userCount})`;
+};
+
+const addMessage = (message) => {
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.append(li);
+};
+
+const handleMessageSubmit = (event) => {
+  event.preventDefault();
+  const input = room.querySelector("input");
+  const value = input.value;
+  socket.emit("message", input.value, roomName, () =>
+    addMessage(`You: ${value}`)
+  );
+  input.value = "";
+};
+
+const showChat = (roomName, userCount) => {
+  roomTitle(roomName, userCount);
+  const form = room.querySelector("form");
+  room.hidden = false;
+  form.addEventListener("submit", handleMessageSubmit);
+};
+
+const handleRoomSubmit = async (event) => {
+  event.preventDefault();
+  const input = welcome.querySelector("input");
+  await initCall();
+  socket.emit("enter_room", input.value, showChat);
+  roomName = input.value;
+  input.value = "";
+};
+
+const showRoom = () => {
+  const form = welcome.querySelector("form");
+  nickname.hidden = true;
+  welcome.hidden = false;
+  form.addEventListener("submit", handleRoomSubmit);
+};
+
+const handleNickSubmit = (event) => {
+  event.preventDefault();
+  const input = nickname.querySelector("input");
+  socket.emit("nickname", input.value, showRoom);
+};
+// ---------------- End chat function part ------------------
 
 // event listen
 form.addEventListener("submit", handleNickSubmit);
@@ -160,7 +165,10 @@ cameraBtn.addEventListener("click", handleCameraClick);
 cameraSelect.addEventListener("input", handleCameraChange);
 
 // socket event
-socket.on("welcome", (nickname, countUser) => {
+socket.on("welcome", async (nickname, countUser) => {
+  const offer = await myPeerConnection.createOffer();
+  myPeerConnection.setLocalDescription(offer);
+  socket.emit("offer", offer, roomName);
   roomTitle(roomName, countUser);
   addMessage(`${nickname} Joined😍`);
 });
@@ -181,3 +189,20 @@ socket.on("rooms", (rooms) => {
     roomList.append(li);
   });
 });
+socket.on("offer", async (offer) => {
+  myPeerConnection.setRemoteDescription(offer);
+  const answer = await myPeerConnection.createAnswer();
+  myPeerConnection.setLocalDescription(answer);
+  socket.emit("answer", answer, roomName);
+});
+socket.on("answer", (answer) => {
+  myPeerConnection.setRemoteDescription(answer);
+});
+
+// RTC (화상채팅)
+const makeConnection = () => {
+  myPeerConnection = new RTCPeerConnection();
+  myStream
+    .getTracks()
+    .forEach((track) => myPeerConnection.addTrack(track, myStream));
+};

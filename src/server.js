@@ -83,6 +83,13 @@ io.on("connection", (socket) => {
     socket["nickname"] = nickname;
     done();
   });
+  // 화생채팅
+  socket.on("offer", (offer, room) => {
+    socket.to(room).emit("offer", offer);
+  });
+  socket.on("answer", (answer, room) => {
+    socket.to(room).emit("answer", answer);
+  });
 });
 
 server.listen(PORT, () => console.log(`✅ Listening on http://localhost:4000`));
