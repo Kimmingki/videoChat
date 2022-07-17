@@ -70,6 +70,7 @@ form.addEventListener("submit", handleNickSubmit);
 
 // socket event
 socket.on("welcome", async (nick, countUser) => {
+  // chat
   myDataChannel = myPeerConnection.createDataChannel("chat");
   myDataChannel.addEventListener("message", (event) =>
     addMessage(`${nick}: ${event.data}`)

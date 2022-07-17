@@ -76,12 +76,6 @@ io.on("connection", (socket) => {
     io.sockets.emit("rooms", publicRooms()); // 방 정보
   });
 
-  // 채팅
-  // socket.on("message", (msg, room, done) => {
-  //   socket.to(room).emit("message", `${socket.nickname}: ${msg}`);
-  //   done();
-  // });
-
   // 닉네임
   socket.on("nickname", (nickname, done) => {
     socket["nickname"] = nickname;

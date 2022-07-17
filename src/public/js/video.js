@@ -114,6 +114,7 @@ cameraBtn.addEventListener("click", handleCameraClick);
 cameraSelect.addEventListener("input", handleCameraChange);
 
 socket.on("offer", async (offer, nickname) => {
+  // chat
   myPeerConnection.addEventListener("datachannel", (event) => {
     myDataChannel = event.channel;
     myDataChannel.addEventListener("message", (event) =>
