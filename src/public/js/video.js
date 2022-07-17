@@ -1,4 +1,5 @@
 // video document
+const mainRoom = document.getElementById("mainRoom");
 const call = document.getElementById("call");
 const myFace = document.getElementById("myFace");
 const muteBtn = document.getElementById("mute");
@@ -11,7 +12,7 @@ let myStream;
 let myPeerConnection;
 let muted = false;
 let cameraOff = false;
-call.hidden = true;
+mainRoom.hidden = true;
 
 // ---------------- Start video function part ------------------
 const getCameras = async () => {
@@ -93,7 +94,7 @@ const handleCameraChange = async () => {
 
 const initCall = async () => {
   welcome.hidden = true;
-  call.hidden = false;
+  mainRoom.hidden = false;
   await getMidea();
   makeConnection();
 };
@@ -112,7 +113,13 @@ muteBtn.addEventListener("click", handleMuteClick);
 cameraBtn.addEventListener("click", handleCameraClick);
 cameraSelect.addEventListener("input", handleCameraChange);
 
-socket.on("offer", async (offer) => {
+socket.on("offer", async (offer, nickname) => {
+  myPeerConnection.addEventListener("datachannel", (event) => {
+    myDataChannel = event.channel;
+    myDataChannel.addEventListener("message", (event) =>
+      addMessage(`${nickname}: ${event.data}`)
+    );
+  });
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   myPeerConnection.setLocalDescription(answer);

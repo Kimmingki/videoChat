@@ -77,10 +77,10 @@ io.on("connection", (socket) => {
   });
 
   // 채팅
-  socket.on("message", (msg, room, done) => {
-    socket.to(room).emit("message", `${socket.nickname}: ${msg}`);
-    done();
-  });
+  // socket.on("message", (msg, room, done) => {
+  //   socket.to(room).emit("message", `${socket.nickname}: ${msg}`);
+  //   done();
+  // });
 
   // 닉네임
   socket.on("nickname", (nickname, done) => {
@@ -90,7 +90,7 @@ io.on("connection", (socket) => {
 
   // 화생채팅
   socket.on("offer", (offer, room) => {
-    socket.to(room).emit("offer", offer);
+    socket.to(room).emit("offer", offer, socket.nickname);
   });
   socket.on("answer", (answer, room) => {
     socket.to(room).emit("answer", answer);

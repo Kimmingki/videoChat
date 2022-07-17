@@ -9,6 +9,7 @@ const room = document.getElementById("room");
 
 // chat init
 let roomName = "";
+let myDataChannel;
 welcome.hidden = true;
 room.hidden = true;
 
@@ -29,9 +30,8 @@ const handleMessageSubmit = (event) => {
   event.preventDefault();
   const input = room.querySelector("input");
   const value = input.value;
-  socket.emit("message", input.value, roomName, () =>
-    addMessage(`You: ${value}`)
-  );
+  addMessage(`You: ${value}`);
+  myDataChannel.send(value);
   input.value = "";
 };
 
@@ -69,20 +69,22 @@ const handleNickSubmit = (event) => {
 form.addEventListener("submit", handleNickSubmit);
 
 // socket event
-socket.on("welcome", async (nickname, countUser) => {
+socket.on("welcome", async (nick, countUser) => {
+  myDataChannel = myPeerConnection.createDataChannel("chat");
+  myDataChannel.addEventListener("message", (event) =>
+    addMessage(`${nick}: ${event.data}`)
+  );
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
   socket.emit("offer", offer, roomName);
   roomTitle(roomName, countUser);
-  addMessage(`${nickname} Joined😍`);
+  addMessage(`${nick} Joined😍`);
 });
 
 socket.on("bye", (nickname, countUser) => {
   roomTitle(roomName, countUser);
   addMessage(`${nickname} left😭`);
 });
-
-socket.on("message", addMessage);
 
 socket.on("rooms", (rooms) => {
   const roomList = welcome.querySelector("ul");
