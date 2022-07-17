@@ -57,6 +57,7 @@ const sockets = [];
 io.on("connection", (socket) => {
   // init
   socket["nickname"] = "Anon";
+
   // 채팅방 접속
   socket.on("enter_room", (room, done) => {
     socket.join(room);
@@ -64,6 +65,7 @@ io.on("connection", (socket) => {
     socket.to(room).emit("welcome", socket.nickname, countUser(room));
     io.sockets.emit("rooms", publicRooms()); // 방 정보
   });
+
   // 채팅방 퇴장
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) =>
@@ -73,22 +75,28 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     io.sockets.emit("rooms", publicRooms()); // 방 정보
   });
+
   // 채팅
   socket.on("message", (msg, room, done) => {
     socket.to(room).emit("message", `${socket.nickname}: ${msg}`);
     done();
   });
+
   // 닉네임
   socket.on("nickname", (nickname, done) => {
     socket["nickname"] = nickname;
     done();
   });
+
   // 화생채팅
   socket.on("offer", (offer, room) => {
     socket.to(room).emit("offer", offer);
   });
   socket.on("answer", (answer, room) => {
     socket.to(room).emit("answer", answer);
+  });
+  socket.on("ice", (ice, room) => {
+    socket.to(room).emit("ice", ice);
   });
 });
 

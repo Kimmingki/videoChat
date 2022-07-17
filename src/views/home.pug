@@ -16,6 +16,7 @@ html(lang="en")
                     button#mute Mute
                     button#camera Camera Off
                     select#cameras
+                    video#peerFace(autoplay, playsinline, width="400", height="400")
             #nickname 
                 form
                     input(placeholder="Nickname", required, type="text")
@@ -35,3 +36,4 @@ html(lang="en")
 
         script(src="/socket.io/socket.io.js") 
         script(src="../public/js/app.js") 
+        script(src="../public/js/video.js")
