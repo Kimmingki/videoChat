@@ -4,6 +4,8 @@
 
 ## Preview
 
+https://user-images.githubusercontent.com/27759684/179451166-9208fe86-a505-48a9-b619-2e9202b916aa.mp4
+
 ---
 
 ## 기능 기획
